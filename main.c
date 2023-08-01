@@ -22,6 +22,14 @@ int p1_authChecker(int arr1[], int size1, int arr2[], int size1_false) {
     return 0; // No duplicates found
 }
 
+int p2_authChecker(int arr2[], int size2) {
+    int sum = 0;
+    for (int p2 = 0; p2 < size2; p2++) {
+        sum = sum + arr2[p2];
+    }
+    return sum % 7; // Calculate the remainder
+}
+
 int main() {
     // Seed the random generator with the current time
     srand(time(NULL));
@@ -29,36 +37,35 @@ int main() {
     // This contains the array used to store the keys.
     // The p1 is the first part of the key (123-XXXXXXX).
     // The p2 is the second part of the key (XXX-1234567).
-	// The sizes are used for logic in this code.
+    // The sizes are used for logic in this code.
     int p1_key[2];
     int p2_key[7];
     int p1_key_false[] = {333, 444, 555, 666, 777, 888, 999};
-	int sum;
     int size1 = sizeof(p1_key) / sizeof(p1_key[0]);
     int size1_false = sizeof(p1_key_false) / sizeof(p1_key_false[0]);
-	int size2 = sizeof(p2_key) / sizeof(p2_key[0]);
+    int size2 = sizeof(p2_key) / sizeof(p2_key[0]);
 
-    // Populate both arrays with numbers between 0 to 9.
-    key_generator(p1_key, p2_key, size1, size2);
+    do {
+        // Populate both arrays with numbers between 0 to 9.
+        key_generator(p1_key, p2_key, size1, size2);
 
+        // P1 Authentication key checker.
+        if (p1_authChecker(p1_key, size1, p1_key_false, size1_false)) {
+            continue;  // Regenerate the keys
+        } else {
+            printf("");
+        }
 
-    // P1 Authentication key checker.
-    if (p1_authChecker(p1_key, size1, p1_key_false, size1_false)) {
-        printf("p1_key authentication failed\n");
-    } else {
-        printf("p1_key has authentication passed\n");
-    }
+        // P2 Authentication key checker.
+        int p2_auth_1 = p2_authChecker(p2_key, size2);
+        if (p2_auth_1 == 0) {
+            printf("");
+        } else {
+            continue; // Regenerate the keys
+        }
 
-	// P2 Authentication key checker.
-	for(int p2 = 0; p2 < size2; p2++)
-		sum = sum + p2_key[p2];
-		int p2_auth_1 = sum / 7;
-
-	if(p2_auth_1 == 0){
-		printf("p2_key authentication passed\n");
-	}else{
-		printf("p2_key authentication failed\n");
-	}
+        // If either p1_key or p2_key authentication failed, regenerate the keys.
+    } while (p1_authChecker(p1_key, size1, p1_key_false, size1_false) || p2_authChecker(p2_key, size2) != 0);
 
     // Test print output from both arrays.
     printf("p1_key: ");
@@ -71,7 +78,7 @@ int main() {
         printf("%d ", p2_key[gen2]);
     }
 
-	printf("\n");
+    printf("\n");
 
     return 0;
 }
